@@ -50,32 +50,6 @@ mod_basin_atlas_ui <- function(id) {
   border-radius: 10px;
 }
 
-.map-loading-overlay{
-  position:absolute;
-  inset:0;
-  z-index:2000;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.75));
-  backdrop-filter: blur(3px);
-  transition: opacity 250ms ease;
-}
-
-.map-loading-overlay.hidden{
-  opacity:0;
-  pointer-events:none;
-}
-
-.map-loading-card{
-  background: rgba(255,255,255,0.95);
-  border-radius: 14px;
-  padding: 14px 16px;
-  box-shadow: 0 10px 28px rgba(0,0,0,0.18);
-  text-align:center;
-  min-width: 220px;
-}
-
 .leaflet-container {
   cursor: default !important;
   margin-bottom: 0px;
@@ -252,126 +226,73 @@ body {
         "))
       ),
 
-        class = "p-0",
-        sidebar_collapsible = FALSE,
       bslib::layout_sidebar(
         class = "p-0",
         sidebar_collapsible = FALSE,
         sidebar = bslib::sidebar(
-          open = "open",
+          open = c("open"),
           width = "28%",
           bg = "white",
 
           div(style = "padding: 1px;",
-              div(style = "text-align: center; margin: 2px 0; font-weight: bold; font-size: 14px; color: #888;",
-                  "Select a variable to view globally:"),
+              div(style = "text-align: center; margin: 2px 0; font-weight: bold; font-size: 14px; color: #888;", "Select a variable to view globally:"),
+              h4(bsicons::bs_icon("moisture"), " Cross-sector Nutrient Budgets", style = "color:black; font-size: 12px;"),
+              div(class = "dropdown-info",
+                  selectInput(ns("nutrient_dataset"), label = NULL,
+                              choices = c("Select..." = "",
+                                          "Phosphorus load from surface runoff from natural land" = "Phosphorus_Rivers_Psurface_runoff_nat",
+                                          "Phosphorus load from surface runoff from agricultural land" = "Phosphorus_Rivers_Psurface_runoff_agri",
+                                          "Phosphorus load from weathering reaching surface water" = "Phosphorus_Rivers_Pweathering",
+                                          "Phosphorus load from allochtonous organic matter input to rivers" = "Phosphorus_Rivers_Pvegetation",
+                                          "Phosphorus load from aquaculture to surface water" = "Phosphorus_Rivers_Paquaculture",
+                                          "Phosphorus load from waste water and sewage (human and industry) to surface water" = "Phosphorus_Rivers_Psewage",
+                                          "Nitrogen load from surface runoff from natural land" = "Nitrogen_Rivers_Nsurface_runoff_nat",
+                                          "Nitrogen load from surface runoff from agricultural land)" = "Nitrogen_Rivers_Nsurface_runoff_agri",
+                                          "Nitrogen load from groundwater from natural land" = "Nitrogen_Rivers_Ngroundwater_nat",
+                                          "Nitrogen load from groundwater from agricultural land" = "Nitrogen_Rivers_Ngroundwater_agri",
+                                          "Nitrogen load from allochtonous organic matter input to rivers" = "Nitrogen_Rivers_Nvegetation",
+                                          "Direct nitrogen deposition on water from the atmosphere" = "Nitrogen_Rivers__Ndeposition_water",
+                                          "Nitrogen load from waste water and sewage (human and industry) to surface water" = "Nitrogen_Rivers_Nsewage"),
+                              selected = "", width = "85%"),
+                  div(class = "info-icon", bslib::tooltip(bsicons::bs_icon("info-circle"), p("Phosphorus and nitrogen budgets across sectors")))
+              ),
 
-              # accordion style drop down
-              bslib::accordion(
-                id = ns("variable_accordion"),
-                open = FALSE,
-                multiple = FALSE,
+              div(style = "text-align: center; margin: 5px 0; font-weight: bold; font-size: 14px; color: #888;", "or"),
 
-                # PHOSPHORUS
-                bslib::accordion_panel(
-                  title = tagList(bsicons::bs_icon("droplet-fill"), " Phosphorus Loads"),
-                  icon = bsicons::bs_icon("chevron-down"),
-                  value = "phosphorus",
-                  selectInput(ns("phosphorus_dataset"),
-                              label = NULL,
-                              choices = c(
-                                "Select..." = "",
-                                "Surface runoff from natural land" = "Phosphorus_Rivers_Psurface_runoff_nat",
-                                "Surface runoff from agricultural land" = "Phosphorus_Rivers_Psurface_runoff_agri",
-                                "Weathering reaching surface water" = "Phosphorus_Rivers_Pweathering",
-                                "Allochtonous organic matter input" = "Phosphorus_Rivers_Pvegetation",
-                                "Aquaculture to surface water" = "Phosphorus_Rivers_Paquaculture",
-                                "Waste water and sewage" = "Phosphorus_Rivers_Psewage"
-                              ),
-                              selected = "",
-                              width = "100%"),
-                  div(style = "font-size: 11px; color: #666; margin-top: 5px; padding: 5px; background-color: #f8f9fa; border-radius: 4px;",
-                      "Phosphorus loads from various sources (kg P/km²/yr)")
-                ),
 
-                # NITROGEN
-                bslib::accordion_panel(
-                  title = tagList(bsicons::bs_icon("droplet-fill"), " Nitrogen Loads"),
-                  icon = bsicons::bs_icon("chevron-down"),
-                  value = "nitrogen",
-                  selectInput(ns("nitrogen_dataset"),
-                              label = NULL,
-                              choices = c(
-                                "Select..." = "",
-                                "Surface runoff from natural land" = "Nitrogen_Rivers_Nsurface_runoff_nat",
-                                "Surface runoff from agricultural land" = "Nitrogen_Rivers_Nsurface_runoff_agri",
-                                "Groundwater from natural land" = "Nitrogen_Rivers_Ngroundwater_nat",
-                                "Groundwater from agricultural land" = "Nitrogen_Rivers_Ngroundwater_agri",
-                                "Allochtonous organic matter input" = "Nitrogen_Rivers_Nvegetation",
-                                #"Direct deposition on water" = "Nitrogen_Rivers__Ndeposition_water",
-                                "Waste water and sewage" = "Nitrogen_Rivers_Nsewage"
-                              ),
-                              selected = "",
-                              width = "100%"),
-                  div(style = "font-size: 11px; color: #666; margin-top: 5px; padding: 5px; background-color: #f8f9fa; border-radius: 4px;",
-                      "Nitrogen loads from various sources (kg N/km²/yr)")
-                ),
+              h4(bsicons::bs_icon("flower1"), " Ecosystem Data", style = "color:black; font-size: 12px;"),
+              div(class = "dropdown-info",
+                  selectInput(ns("gbf_2"), label = NULL,
+                              choices = c("Select..." = "",
+                                          "Annual natural river discharge per year" = "dis_m3_pyr",
+                                          "Annual minimum natural river discharge per year" = "dis_m3_pmn",
+                                          "Annual maximum natural river discharge per year" = "dis_m3_pmx",
+                                          "Annual land surface runoff per year" = "run_mm_syr",
+                                          "Global aridity index in sub-basin" = "ari_ix_sav",
+                                          "Global aridity index in tot. watershed upstream" = "ari_ix_uav",
+                                          "Land cover classes (spatial majority)" ="glc_cl_smj",
+                                          "Wetland classes (spatial majority)" = "wet_cl_smj",
+                                          "Protected area extent in sub-basin" = "pac_pc_sse",
+                                          "Protected area extent in tot. watershed upstream" = "pac_pc_use"),
+                              selected = "", width = "85%"),
+                  div(class = "info-icon", bslib::tooltip(bsicons::bs_icon("info-circle"), p("Discharge, aridity and landscape variables")))
+              ),
 
-                # ECOSYSTEM DTA
-                bslib::accordion_panel(
-                  title = tagList(bsicons::bs_icon("flower1"), " Ecosystem Data"),
-                  icon = bsicons::bs_icon("chevron-down"),
-                  value = "ecosystem",
-                  selectInput(ns("gbf_2"),
-                              label = NULL,
-                              choices = c(
-                                "Select..." = "",
-                                "Annual natural river discharge" = "dis_m3_pyr",
-                                "Annual minimum discharge" = "dis_m3_pmn",
-                                "Annual maximum discharge" = "dis_m3_pmx",
-                                "Annual land surface runoff" = "run_mm_syr",
-                                "Aridity index (sub-basin)" = "ari_ix_sav",
-                                "Aridity index (watershed)" = "ari_ix_uav",
-                                "Land cover classes" = "glc_cl_smj",
-                                "Wetland classes" = "wet_cl_smj",
-                                "Protected area (sub-basin)" = "pac_pc_sse",
-                                "Protected area (watershed)" = "pac_pc_use"
-                              ),
-                              selected = "",
-                              width = "100%"),
-                  div(style = "font-size: 11px; color: #666; margin-top: 5px; padding: 5px; background-color: #f8f9fa; border-radius: 4px;",
-                      "Discharge, aridity, and landscape variables")
-                )
-              )
-
+              #div(style = "text-align: center; margin-top: 5px; margin-bottom: 5px;",
+              #   actionButton(ns("reset_button"), "Reset Selections",
+              #              class = "btn btn-warning", style = "width: 70%; font-weight: bold;"))
           ),
 
-          tags$img(src = "www/logos/diagram.png", alt = "Diagram",
-                   style = "max-width: 100%; display: block; margin-top: 15px;")
+          tags$img(src = "www/logos/diagram.png", alt = "Diagram", style = "max-width: 100%; display: block;")
         ),
 
 
-        div(
-          style = "position: relative; width: 100%; height: 100%;",
 
-          leaflet::leafletOutput(ns("map"), height = "100%", width = "100%"),
-
-          # overlay sits on top of leaflet until we hide it with JS
-          div(
-            id = ns("map_loading_overlay"),
-            class = "map-loading-overlay",
-            div(class = "map-loading-card",
-                tags$div(class="spinner-border text-success", role="status"),
-                tags$div(style="margin-top:8px; font-weight:600;", "Loading map…"),
-                tags$div(style="font-size:12px; color: #666;", "Preparing basin polygons")
-            )
-          )
-        )
+        leaflet::leafletOutput(ns("map"), height = "100%", width = "100%")
       ),
 
-
       conditionalPanel(
-        condition = "input.phosphorus_dataset !== '' || input.nitrogen_dataset !== ''",
+        condition = "input.nutrient_dataset !== 'legacy' && input.nutrient_dataset !== ''",
         ns = ns,
         shinyjqui::jqui_draggable(
           absolutePanel(
@@ -408,16 +329,16 @@ body {
         )
       ),
 
-      # Info
-    shinyjqui::jqui_draggable(
-      absolutePanel(
-        id = ns("info_box"),
-        class = "info-panel",
-        top = "100px",
-        left = "30%",
-        right = "auto",
-        bottom = "auto",
-        draggable = FALSE,
+      # Info panel
+      shinyjqui::jqui_draggable(
+        absolutePanel(
+          id = ns("info_box"),
+          class = "info-panel",
+          top = "100px",
+          left = "30%",
+          right = "auto",
+          bottom = "auto",
+          draggable = FALSE,
           style = "z-index: 800; background-color: rgba(255, 255, 255, 0.98); padding: 10px; border-radius: 8px; box-shadow: 2px 2px 5px rgba(0,0,0,0.3);",
 
           h5("Search for a specific location", style = "margin-top: 0; margin-bottom: 5px; font-weight: bold; font-size: 14px; color: #333;"),
@@ -435,23 +356,20 @@ body {
         )
       ),
 
-      #  logo box
+      # dismissable logo box
       shinyjqui::jqui_draggable(
         uiOutput(ns("logo_box_ui"))
       )
     )
-) }
+  ) }
 
 
 #' basin_atlas Server Functions
 #'
 #' @noRd
-mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes_precise, globo_topo_poly, globo_topo_lines) {
+mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes_precise, globo_topo_poly, globo_topo_lines, coast_sf) {
   moduleServer(id, session = x, function(input, output, session) {
     ns <- session$ns
-
-
-
     rv_local <- reactiveValues(
       showWelcome = TRUE,
       hovered_id = NULL,
@@ -460,44 +378,12 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
       category_display = NULL,
       done = 0
     )
-    session$onFlushed(function() {
-      shinyjs::runjs(sprintf("
-    (function(){
-      var mapId = '%s';
-      var overlayId = '%s';
 
-      function hideOverlay(){
-        var overlay = document.getElementById(overlayId);
-        if(!overlay) return;
-        overlay.classList.add('hidden');
-        setTimeout(function(){ overlay.style.display = 'none'; }, 300);
-      }
+    coastal_lake_ids <- unique(coast_sf$Hylak_id)
 
-      var tries = 0;
-      function tryAttach(){
-        tries++;
-        var widget = HTMLWidgets.find('#' + mapId);
-
-        if(widget && widget.getMap){
-          var m = widget.getMap();
-
-          hideOverlay();
-          return;
-        }
-
-        if(tries < 200){
-          setTimeout(tryAttach, 50);
-        } else {
-          hideOverlay();
-        }
-      }
-
-      tryAttach();
-    })();
-  ", ns("map"), ns("map_loading_overlay")))
-    }, once = TRUE)
 
     session$onFlush(once = TRUE, function() {
+
       ssp_url <- "https://ore.exeter.ac.uk/articles/online_resource/The_Scenario_Model_Intercomparison_Project_ScenarioMIP_for_CMIP6/29724578?file=56741828"
 
       ssp_link_html <- paste0(
@@ -542,7 +428,7 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
       ")
     }
 
-    #  valid polygons
+    #  function to check for valid polygons
     is_valid_polygon <- function(data) {
       return(inherits(sf::st_geometry(data), c("sfc_POLYGON", "sfc_MULTIPOLYGON")))
     }
@@ -560,7 +446,8 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
       Nitrogen_Rivers_Ngroundwater_nat = "kg N/km²/yr",
       Nitrogen_Rivers_Ngroundwater_agri = "kg N/km²/yr",
       Nitrogen_Rivers_Nvegetation = "kg N/km²/yr",
-      #Nitrogen_Rivers__Ndeposition_water = "kg N/km²/yr",  # Double underscore
+      Nitrogen_Rivers_Naquaculture = "kg N/km²/yr",
+      Nitrogen_Rivers_Ndeposition_water = "kg N/km²/yr",
       Nitrogen_Rivers_Nsewage = "kg N/km²/yr",
       dis_m3_pyr = "m³/yr",
       dis_m3_pmn = "m³/yr",
@@ -573,33 +460,16 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
       pac_pc_sse = "%",
       pac_pc_use = "%"
     )
-    nutrient_vars <- c(
-      "Phosphorus_Rivers_Psurface_runoff_nat",
-      "Phosphorus_Rivers_Psurface_runoff_agri",
-      "Phosphorus_Rivers_Pweathering",
-      "Phosphorus_Rivers_Pvegetation",
-      "Phosphorus_Rivers_Paquaculture",
-      "Phosphorus_Rivers_Psewage",
-      "Nitrogen_Rivers_Nsurface_runoff_nat",
-      "Nitrogen_Rivers_Nsurface_runoff_agri",
-      "Nitrogen_Rivers_Ngroundwater_nat",
-      "Nitrogen_Rivers_Ngroundwater_agri",
-      "Nitrogen_Rivers_Nvegetation",
-      "Nitrogen_Rivers__Ndeposition_water",
-      "Nitrogen_Rivers_Nsewage"
-    )
-
+    nutrient_vars <- c("Phosphorus_Rivers_Psurface_runoff_nat", "Phosphorus_Rivers_Psurface_runoff_agri", "Phosphorus_Rivers_Pweathering", "Phosphorus_Rivers_Pvegetation", "Phosphorus_Rivers_Paquaculture", "Phosphorus_Rivers_Psewage", "Nitrogen_Rivers_Nsurface_runoff_nat", "Nitrogen_Rivers_Nsurface_runoff_agri", "Nitrogen_Rivers_Ngroundwater_nat", "Nitrogen_Rivers_Ngroundwater_agri", "Nitrogen_Rivers_Nvegetation", "Nitrogen_Rivers_Naquaculture", "Nitrogen_Rivers_Ndeposition_water", "Nitrogen_Rivers_Nsewage")
     years <- seq(1970, 2070, 5)
     ssps <- c("SSP1", "SSP2", "SSP3", "SSP4", "SSP5")
     global_variable_ranges <- list()
-
     for (var in nutrient_vars) {
       columns_to_check <- paste(rep(ssps, each = length(years)), var, rep(years, times = length(ssps)), sep = "_")
       existing_columns <- columns_to_check[columns_to_check %in% colnames(lev3_vars)]
       all_values <- unlist(lev3_vars[, existing_columns, drop = FALSE])
       global_variable_ranges[[var]] <- list(min = min(all_values, na.rm = TRUE), max = max(all_values, na.rm = TRUE))
     }
-
     static_vars <- c("dis_m3_pyr", "dis_m3_pmn", "dis_m3_pmx", "run_mm_syr", "ari_ix_sav", "ari_ix_uav", "pac_pc_sse", "pac_pc_use")
     for (var in static_vars) {
       values <- lev3_vars[[var]]
@@ -610,9 +480,14 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
     lev3_vars_converted <- reactive({
       data_copy <- lev3_vars
 
-      # conversion equasion: 1 kg / km^2-yr * 2500 km^2/basin / 1,000,000 kg/tonne
+
+      # conversion factor: 1 kg / km^2-yr * 2500 km^2/basin / 1,000,000 kg/tonne
+
+      # calculate the conversion
       ssp_cols <- grep("^SSP", names(data_copy), value = TRUE)
       data_copy[ssp_cols] <- data_copy[ssp_cols] * (2500 / 1000000)
+
+
 
       rv_local$units_lookup_converted <- units_lookup
 
@@ -635,21 +510,20 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
 
     observe({
       # disable if year < 2015
-      if (!is.null(input$year) && input$year < 2015) {
+      if (input$year < 2015) {
         shinyjs::disable("climate_scenario")
       } else {
         shinyjs::enable("climate_scenario")
       }
     })
 
+
     # reactive expression to get the column name to be displayed
     layer_to_display <- eventReactive(rv_local$done, {
       if(rv_local$done != 0){
-        if (rv_local$category_display == "phosphorus_dataset" && !is.null(input$phosphorus_dataset) && input$phosphorus_dataset != "") {
-          column <- paste(input$climate_scenario, input$phosphorus_dataset, input$year, sep = "_")
-        } else if (rv_local$category_display == "nitrogen_dataset" && !is.null(input$nitrogen_dataset) && input$nitrogen_dataset != "") {
-          column <- paste(input$climate_scenario, input$nitrogen_dataset, input$year, sep = "_")
-        } else if (rv_local$category_display == "gbf_2" && !is.null(input$gbf_2)) {
+        if (rv_local$category_display == "nutrient_dataset" && input$nutrient_dataset != "legacy") {
+          column <- paste(input$climate_scenario, input$nutrient_dataset, input$year, sep = "_")
+        } else if (rv_local$category_display == "gbf_2") {
           column <- input$gbf_2
           if (!(column %in% colnames(lev3_vars_converted()))) {
             warning(paste("Warning: Column", column, "not found in dataset"))
@@ -674,9 +548,11 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
       )
     })
 
+
     observeEvent(input$dismiss_logo, {
       rv_local$showLogo <- FALSE
     })
+
 
     output$logo_box_ui <- renderUI({
       req(rv_local$showLogo)
@@ -693,10 +569,10 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
       )
     })
 
-    #  default phosphorus dataset for beginning of session
-    observeEvent(input$phosphorus_dataset, {
-      if (is.null(input$phosphorus_dataset) || input$phosphorus_dataset == "") {
-        updateSelectInput(session, "phosphorus_dataset", selected = "Phosphorus_Rivers_Psurface_runoff_nat")
+    #  default nutrient dataset for beginning of session
+    observeEvent(input$nutrient_dataset, {
+      if (is.null(input$nutrient_dataset) || input$nutrient_dataset == "") {
+        updateSelectInput(session, "nutrient_dataset", selected = "Phosphorus_Rivers_Psurface_runoff_nat")
       }
     }, once = TRUE, ignoreInit = FALSE)
 
@@ -725,56 +601,72 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
       )
     })
 
-    # PHOSPHORUS SELECTION
-    observeEvent(input$phosphorus_dataset, ignoreInit = FALSE, {
-      if (!is.null(input$phosphorus_dataset) && input$phosphorus_dataset != "") {
-        if (!is.null(input$nitrogen_dataset) && input$nitrogen_dataset != "") {
-          updateSelectInput(session, "nitrogen_dataset", selected = "")
+    observeEvent(c(input$nutrient_dataset), ignoreInit = FALSE, label = "when a nutrient layer is chosen, set to nothing the others (gbf_2 and gbf_7)", {
+      if (as.character(input$nutrient_dataset != "")){
+        if (input$gbf_2 != ""){
+          shinyjs::reset("gbf_2", asis = FALSE)
         }
-        if (!is.null(input$gbf_2) && input$gbf_2 != "") {
-          updateSelectInput(session, "gbf_2", selected = "")
-        }
-
-        rv_local$category_display <- "phosphorus_dataset"
-        rv_local$done <- rv_local$done + 1
+        rv_local$category_display <- "nutrient_dataset"
+        rv_local$done <- rv_local$done+1
       }
     })
 
-    # NITROGEN SELECTION
-    observeEvent(input$nitrogen_dataset, ignoreInit = FALSE, {
-      if (!is.null(input$nitrogen_dataset) && input$nitrogen_dataset != "") {
-        if (!is.null(input$phosphorus_dataset) && input$phosphorus_dataset != "") {
-          updateSelectInput(session, "phosphorus_dataset", selected = "")
+    observeEvent(input$gbf_2, {
+      if (input$gbf_2 != "") {
+        if (!is.null(input$nutrient_dataset) && input$nutrient_dataset != "") {
+          shinyjs::reset("nutrient_dataset", asis = FALSE)
+          updateSelectInput(session, "nutrient_dataset", selected = "")
+          print(input$nutrient_dataset)
         }
-        if (!is.null(input$gbf_2) && input$gbf_2 != "") {
-          updateSelectInput(session, "gbf_2", selected = "")
-        }
-
-        rv_local$category_display <- "nitrogen_dataset"
-        rv_local$done <- rv_local$done + 1
-      }
-    })
-
-    # ECOSYSTEM  SELECTION
-    observeEvent(input$gbf_2, ignoreInit = FALSE, {
-      if (!is.null(input$gbf_2) && input$gbf_2 != "") {
-        if (!is.null(input$phosphorus_dataset) && input$phosphorus_dataset != "") {
-          updateSelectInput(session, "phosphorus_dataset", selected = "")
-        }
-        if (!is.null(input$nitrogen_dataset) && input$nitrogen_dataset != "") {
-          updateSelectInput(session, "nitrogen_dataset", selected = "")
-        }
-
         rv_local$category_display <- "gbf_2"
         rv_local$done <- rv_local$done + 1
       }
-    })
+    }, ignoreInit = FALSE, label = "when a gbf_2 layer is chosen, set to nothing the others (nutrient and gbf_7)")
 
+    #observe({
+    # selected_var <- input$nutrient_dataset
+    #if (selected_var == "") selected_var <- input$gbf_2
+    #descriptions <- list(
+    # "Phosphorus_Rivers_Psurface_runoff_nat" = "Phosphorus load from surface runoff from natural land (kg P/km²/yr)",
+    #"Phosphorus_Rivers_Psurface_runoff_agri" = "Phosphorus load from surface runoff from agricultural land (kg P/km²/yr)",
+    #"Phosphorus_Rivers_Pweathering" = "Phosphorus load from weathering reaching surface water (kg P/km²/yr)",
+    #"Phosphorus_Rivers_Pvegetation" = "Phosphorus load from allochtonous organic matter input to rivers (kg P/km²/yr)",
+    #"Phosphorus_Rivers_Paquaculture" = "Phosphorus load from aquaculture to surface water (kg P/km²yr)",
+    #"Phosphorus_Rivers_Psewage" = "Phosphorus load from waste water (human and industry) to surface water (kg P/km²/yr)",
+    #"Nitrogen_Rivers_Nsurface_runoff_nat" = "Nitrogen load from surface runoff from natural land (kg N/km²/yr)",
+    #"Nitrogen_Rivers_Nsurface_runoff_agri" = "Nitrogen load from surface runoff from agricultural land (kg N/km²/yr)",
+    #"Nitrogen_Rivers_Ngroundwater_nat" = "Nitrogen load from groundwater from natural land (kg N/km²/yr)",
+    #"Nitrogen_Rivers_Ngroundwater_agri" = "Nitrogen load from groundwater from agricultural land (kg N/km²/yr)",
+    #"Nitrogen_Rivers_Nvegetation" = "Nitrogen load from allochtonous organic matter input to rivers (kg N/km²/yr)",
+    #"Nitrogen_Rivers_Ndeposition_water" = "Direct nitrogen deposition on water (kg N/km²/yr)",
+    #"Nitrogen_Rivers_Naquaculture" = "Nitrogen load from aquaculture to surface water (kg N/km²/yr)",
+    #"Nitrogen_Rivers_Nsewage" = "Nitrogen load from aquaculture to surface water (kg N/km²yr)",
+    #"dis_m3_pyr" = "Annual volume of natural river discharge. Higher values indicate more available water, which can dilute pollutants and support ecosystems.",
+    #"dis_m3_pmn" = "Minimum annual discharge. Lower values suggest vulnerability to drought and ecological stress during dry periods.",
+    #"dis_m3_pmx" = "Maximum annual discharge. High peaks can signal flood risks or seasonal extremes.",
+    #"run_mm_syr" = "Annual surface runoff. Higher values reflect greater water movement over land, potentially increasing erosion and nutrient transport.",
+    #"ari_ix_sav" = "Aridity index in the sub-basin. Lower values mean more arid conditions, influencing water availability and agricultural potential.",
+    #"ari_ix_uav" = "Aridity index across the upstream watershed. Helps assess regional dryness and hydrological stress.",
+    #"glc_cl_smj" = "Dominant land cover class. Indicates the prevailing land use, which shapes runoff, erosion, and nutrient cycling.",
+    #"wet_cl_smj" = "Dominant wetland class. Reflects ecological characteristics important for biodiversity and water purification.",
+    #"pac_pc_sse" = "%",
+    #"pac_pc_use" = "%"
+    #)
+    #desc <- descriptions[[selected_var]] %||% "Select a dataset to see details."
+    #output$variable_info <- renderUI({
+    # if (selected_var != "") {
+    #  div(
+    #   h5("Your selected variable:", style = "margin-top: 0; font-weight: bold;"),
+    #  p(desc, style = "font-size: 14px; color: #333;")
+    #)
+    #  } else {
+    #   NULL
+    #}
+    #})
+    #})
 
-
-    observeEvent(c(input$climate_scenario, input$year), ignoreInit = TRUE, {
-      if ((rv_local$category_display == "phosphorus_dataset" || rv_local$category_display == "nitrogen_dataset") &&
-          isTruthy(input$climate_scenario) && isTruthy(input$year)) {
+    observeEvent(c(input$climate_scenario, input$year), ignoreInit = T, label = "trigger the change in layer when changing scenario and year", {
+      if (rv_local$category_display == "nutrient_dataset" && isTruthy(input$climate_scenario) && isTruthy(input$year)) {
         rv_local$done <- rv_local$done + 1
       }
     })
@@ -782,8 +674,6 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
     observe({
       print("Debug: rv_local$done")
       print(rv_local$done)
-      print("Debug: rv_local$category_display")
-      print(rv_local$category_display)
       print("Debug: layer_to_display()")
       print(layer_to_display())
     })
@@ -813,7 +703,7 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
       }
     })
 
-    # MOUSEOVER
+    ### MOUSEOVER LOGIC ###
     mouse_pos <- reactive({
       req(input$map_mousemove)
       list(lng = input$map_mousemove$lng, lat = input$map_mousemove$lat)
@@ -826,6 +716,7 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
       if (is.null(pos)) return()
 
       sf::sf_use_s2(FALSE)
+      # create a single point in the same crs as shapes
       point_sf <- sf::st_sfc(sf::st_point(c(pos$lng, pos$lat)), crs = sf::st_crs(lev3_shapes_precise))
       point_sf <- sf::st_transform(point_sf, crs = sf::st_crs(lev3_shapes_precise))
 
@@ -846,15 +737,9 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
         if (nrow(hovered_polygon) > 0) {
           layer <- layer_to_display()
           if (!is.null(layer) && layer != "empty") {
-            selected_var <- ""
-            if (!is.null(input$phosphorus_dataset) && input$phosphorus_dataset != "") {
-              selected_var <- input$phosphorus_dataset
-            } else if (!is.null(input$nitrogen_dataset) && input$nitrogen_dataset != "") {
-              selected_var <- input$nitrogen_dataset
-            } else if (!is.null(input$gbf_2) && input$gbf_2 != "") {
-              selected_var <- input$gbf_2
-            }
-
+            selected_var <- input$nutrient_dataset
+            if (selected_var == "") selected_var <- input$gbf_2
+            # safe access the value without converting big dataframes repeatedly
             row_idx <- which(lev3_vars$HYBAS_ID == new_hovered_id)
             value <- NA
             if (length(row_idx) == 1 && layer %in% colnames(lev3_vars)) {
@@ -903,9 +788,11 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
       }
     })
 
+    ### END MOUSEOVER LOGIC ###
 
     observeEvent(c(layer_to_display()), ignoreNULL = TRUE, label = "display layers", {
-      leaflet::leafletProxy(ns("map"), session = session) %>%
+      # remove existing dynamic layers and controls to ensure a fresh base.
+      leaflet::leafletProxy(ns("map"), session = session)%>%
         leaflet::clearGroup("variables") %>%
         leaflet::clearGroup("selected_basin") %>%
         leaflet::clearGroup("lakes_layer") %>%
@@ -921,39 +808,31 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
 
       values$values <- values[[layer]]
 
-      #  variable name from the active category
-      if (rv_local$category_display == "phosphorus_dataset") {
-        base_var_name <- input$phosphorus_dataset
-      } else if (rv_local$category_display == "nitrogen_dataset") {
-        base_var_name <- input$nitrogen_dataset
+      if (rv_local$category_display == "nutrient_dataset") {
+        base_var_name <- input$nutrient_dataset
       } else {
         base_var_name <- input$gbf_2
       }
 
+      #  'is_numeric' outside pipe
       is_numeric <- base_var_name %in% names(rv_local$global_variable_ranges_converted)
 
       if (is_numeric) {
         range_vals <- rv_local$global_variable_ranges_converted[[base_var_name]]
         min_val <- max(0, range_vals$min)
+        # ✅ CORRECTED TYPO HERE: range_vals$max
         max_val <- range_vals$max
         palette <- leaflet::colorNumeric("plasma", domain = c(min_val, max_val), na.color = "transparent")
         legend_values <- c(min_val, max_val)
       } else {
+        # Factor variable logic
         legend_values <- levels(values$values)
         palette <- leaflet::colorFactor(viridisLite::viridis(length(legend_values), option = "turbo"), domain = legend_values)
       }
 
       name_leg <- BasinATLASgol::legend_names(layer)
-
-      selected_var <- ""
-      if (!is.null(input$phosphorus_dataset) && input$phosphorus_dataset != "") {
-        selected_var <- input$phosphorus_dataset
-      } else if (!is.null(input$nitrogen_dataset) && input$nitrogen_dataset != "") {
-        selected_var <- input$nitrogen_dataset
-      } else if (!is.null(input$gbf_2) && input$gbf_2 != "") {
-        selected_var <- input$gbf_2
-      }
-
+      selected_var <- input$nutrient_dataset
+      if (selected_var == "") selected_var <- input$gbf_2
       selected_unit <- rv_local$units_lookup_converted[[selected_var]]
 
       leaflet::leafletProxy(ns("map"), session = session) %>%
@@ -985,20 +864,23 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
               "box-shadow" = "0 1px 3px rgba(0,0,0,0.25)") )
         ) %>%
         leaflet::clearControls() %>%
+
         {
           if (is_numeric) {
             #  legend for numeric data
             leaflet::addLegend(., pal = palette, values = legend_values,
                                title = name_leg, position = "bottomright")
           } else {
-            #  legend for factor data
+            #  multi-column legend for factor data
             leaflet::addLegend(., pal = palette, values = legend_values,
                                title = name_leg, position = "bottomright",
-                               className = "info legend multi-col-legend")
+                               className = "info legend multi-col-legend"
+            )
           }
         }
 
-      # redraw the selected basi
+
+      # redraw the selected basin if one is already chosen
       if (!is.null(rv$lev_3_chosen)) {
         chosen_basin_data <- dplyr::filter(lev3_vars_converted(), HYBAS_ID == rv$lev_3_chosen)
         leaflet::leafletProxy(ns("map"), session = session) %>%
@@ -1013,16 +895,18 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
             layerId = ~HYBAS_ID,
             options = leaflet::pathOptions(clickable = FALSE)
           ) %>%
+          # add the lake lines on top
           leaflet::addPolylines(
-            data = rv$lake_lines_in_lev3,
+            data = dplyr::filter(rv$lakes_in_lev3, !(Hylak_id %in% coastal_lake_ids)),
             color = "white",
             opacity = 0.7,
             group = "lake_borders",
             weight = 0.3,
             layerId = "lake_borders"
           ) %>%
+          # add the lakes with highlight options
           leaflet::addPolygons(
-            data = rv$lakes_in_lev3,
+            data = dplyr::filter(rv$lakes_in_lev3, !(Hylak_id %in% coastal_lake_ids)),
             fillColor = "#2a8a97",
             color = "white",
             group = "lakes_layer",
@@ -1069,16 +953,22 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
         layer <- layer_to_display()
         if (is.null(layer) || layer == "empty") return()
 
-        selected_var <- ""
-        if (!is.null(input$phosphorus_dataset) && input$phosphorus_dataset != "") {
-          selected_var <- input$phosphorus_dataset
-        } else if (!is.null(input$nitrogen_dataset) && input$nitrogen_dataset != "") {
-          selected_var <- input$nitrogen_dataset
-        } else if (!is.null(input$gbf_2) && input$gbf_2 != "") {
-          selected_var <- input$gbf_2
-        }
-
+        selected_var <- input$nutrient_dataset
+        if (selected_var == "") selected_var <- input$gbf_2
         selected_unit <- rv_local$units_lookup_converted[[selected_var]]
+
+        #lev3_vars_data <- lev3_vars_converted()
+        #if (!layer %in% c("glc_cl_smj", "wet_cl_smj")) {
+        # value <- sf::st_drop_geometry(lev3_vars_data)[lev3_vars_data$HYBAS_ID == rv$lev_3_chosen, layer][[1]]
+        #rounded_value <- round(value, 1)
+        #info_html <- paste0(
+        # "<div id='basin-info-box' style='position: relative; padding: 6px 10px; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.25); font-size: 18px; font-weight: 500; display: inline-block; margin-top: 6px;'>",
+        #"<span style='position: absolute; top: 2px; right: 6px; cursor: pointer; font-size: 16px; font-weight: bold; color: #666;' onclick='this.parentElement.style.display=\"none\"'>&times;</span>",
+        #" Your selected HydroBASIN: <b>", rounded_value, "&nbsp;&nbsp;", selected_unit, "</b></div>"
+        #)
+        #leaflet::leaflet::leafletProxy("map") %>%
+        #leaflet::addControl(html = info_html, position = "topleft", layerId = "basin-info")
+        #  }
 
         leaflet::leafletProxy(ns("map"), session = session) %>%
           leaflet::setView(lng = center$X, lat = center$Y, zoom = 6)
@@ -1089,11 +979,13 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
 
     #  add highlight and lakes on top of the existing map
     observeEvent(rv$lev_3_chosen, {
+      # remove ONLY the temp layers from the previous click
       leaflet::leafletProxy(ns("map"), session = session) %>%
         leaflet::clearGroup("selected_basin") %>%
         leaflet::clearGroup("lakes_layer") %>%
         leaflet::clearGroup("lake_borders")
 
+      # if a basin is chosen, draw the highlight and lakes on top.
       if (!is.null(rv$lev_3_chosen)) {
         chosen_basin_data <- dplyr::filter(lev3_vars_converted(), HYBAS_ID == rv$lev_3_chosen)
 
@@ -1157,7 +1049,9 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
       }
     })
 
+
     observeEvent(input$reset_button, {
+      # remove all temporary layers added on click
       leaflet::leafletProxy(ns("map"), session = session) %>%
         leaflet::clearGroup("selected_basin") %>%
         leaflet::clearGroup("lakes_layer") %>%
@@ -1173,9 +1067,7 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
       rv_local$category_display <- NULL
       rv_local$done <- 0
 
-      # reset  dropdowns
-      shinyjs::reset("phosphorus_dataset")
-      shinyjs::reset("nitrogen_dataset")
+      shinyjs::reset("nutrient_dataset")
       shinyjs::reset("gbf_2")
 
       leaflet::leafletProxy(ns("map"), session = session) %>%
@@ -1191,7 +1083,7 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
           mod_lev_7_ui("lev_7_1")
         ),
         size = "xl",
-        easyClose = TRUE,
+        easyClose = T,
         footer = NULL,
         fade = FALSE
       )

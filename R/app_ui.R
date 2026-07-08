@@ -124,21 +124,21 @@ golem_add_external_resources <- function() {
   "))
     ),
 
-   # cookies
+    # CookieConsent CSS & JS
     tags$link(
       rel = "stylesheet",
-      href = "ANONYMISED"
+      href = "https://cdn.jsdelivr.net/gh/orestbida/cookieconsent@3.1.0/dist/cookieconsent.css"
     ),
     tags$script(
-      src = "ANONYMISED"
+      src = "https://cdn.jsdelivr.net/gh/orestbida/cookieconsent@3.1.0/dist/cookieconsent.umd.js"
     ),
 
-    # google analytics
+    # Google Analytics 4
     tags$script(
       type = "text/plain",
       `data-category` = "analytics",
       `data-service` = "Google Analytics 4",
-      src = "ANONYMISED",
+      src = "https://www.googletagmanager.com/gtag/js?id=G-V309GNJ2C3",
       async = NA
     ),
 
@@ -150,7 +150,7 @@ golem_add_external_resources <- function() {
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'G-ANONYMISED');
+        gtag('config', 'G-V309GNJ2C3');
       ")
     ),
 

@@ -14,6 +14,8 @@ load("data/globo_topo_lines.rda")
 load("data/data_socio.rda")
 gbf_sf <- sf::st_read(app_sys("data", "gbf7_nations.gpkg"), quiet = TRUE) %>%
   sf::st_transform(4326)
+coast_sf <- sf::st_read(app_sys("data", "topocat_hylak_id_lev03_hybas_id_v1c_filt2_catchments_outside.gpkg"), quiet = TRUE) %>%
+  sf::st_transform(4326)
 
 app_server <- function(input, output, session) {
 
@@ -22,7 +24,7 @@ app_server <- function(input, output, session) {
       modalDialog(
         title = tags$div(
           style = "text-align: center; margin-bottom: 0;",
-          tags$h2("Welcome to the Global Phosphorus Dashboard",
+          tags$h2("Welcome to the Global Lakes Explorer",
                   style = "font-size: 1.1em; font-weight: bold; margin-bottom: 0.2em;"),
           tags$div("Click outside the box to begin exploring the data",
                    style = "font-size: 0.9em; color: #666; margin-bottom: 0;")
@@ -46,7 +48,7 @@ app_server <- function(input, output, session) {
 
   mod_basin_atlas_server("basin_atlas_1", rv, session,
                            lev3_vars, lev3_lines, lev3_shapes_precise,
-                           globo_topo_poly, globo_topo_lines)
+                           globo_topo_poly, globo_topo_lines, coast_sf)
   mod_lev_7_server("lev_7_1", rv, session, lev7_vars, globo_topo_poly)
   mod_about_server("about_1", rv, session)
   mod_footer_server("footer_1", rv, session)

@@ -141,7 +141,10 @@ mod_lev_7_ui <- function(id) {
                     tags$strong("Disclaimer:"),
                     " For the data sources used, please see the metadata tab and document.
                       UKCEH did not collect this data, but presents a collation from secondary sources.
-                      Please cite the original authors in your own analyses."
+                      Please cite the original authors in your own analyses.
+                      This is a macro-level screening tool.
+                      Nutrient emission data have been aggregated from 0.5 x 0.5 degree spatial grids from the IMAGE-GNM model.
+                      Local in-situ data must always take precedence over global model estimations."
                 )
             )
           )
@@ -151,6 +154,8 @@ mod_lev_7_ui <- function(id) {
           column(
             6,
             h4("Your selected lake (blue) within its catchment (yellow)",
+               style = "text-align:center;"),
+            h6("Lake and catchment shapefiles are derived from Lake-TopoCat (Sikder et al., 2023)",
                style = "text-align:center;"),
             leaflet::leafletOutput(ns("map_7"), height = "500px")
           ),
@@ -397,7 +402,8 @@ mod_lev_7_server <- function(id, rv, x, lev7_vars, globo_topo_poly) {
       "Nitrogen_Rivers_Ngroundwater_agri" = "Nitrogen load from groundwater from agricultural land (kg N yr-1)",
       "Nitrogen_Rivers_Nvegetation" = "Nitrogen load from allochtonous organic matter input to rivers (kg N yr-1)",
       "Nitrogen_Rivers_Naquaculture" = "Nitrogen load from aquaculture to surface water (kg N yr-1)",
-      "Nitrogen_Rivers_Nsewage" = "Nitrogen load from aquaculture to surface water (kg N yr-1)"
+      "Nitrogen_Rivers_Nsewage" = "Nitrogen load from aquaculture to surface water (kg N yr-1)",
+      "Nitrogen_Rivers_Ndeposition_water" = "Direct nitrogen deposition on water (kg N yr-1)"
     )
 
     ssp_full_labels <- c(
@@ -617,11 +623,60 @@ mod_lev_7_server <- function(id, rv, x, lev7_vars, globo_topo_poly) {
 
     output$download_level7_csv <- downloadHandler(
       filename = function() {
-        paste0("Selected_Catchment_Lake_", rv$lake_clicked, "_Level7_Data_", Sys.Date(), ".csv")
+        paste0("Selected_Catchment_Lake_", rv$lake_clicked, "_Catchment_Data_", Sys.Date(), ".csv")
       },
       content = function(file) {
         req(lev_7_vars())
-        write.csv(lev_7_vars(), file, row.names = FALSE)
+        df <- lev_7_vars()
+
+        ssp_cols <- grep("^SSP\\d+_.*_\\d{4}$", names(df), value = TRUE)
+
+        if (length(ssp_cols) > 0) {
+          long_df <- df %>%
+            tidyr::pivot_longer(
+              cols = all_of(ssp_cols),
+              names_to = "Variable",
+              values_to = "Value"
+            ) %>%
+            dplyr::mutate(
+              Scenario = stringr::str_extract(Variable, "SSP\\d+"),
+              Year = as.integer(stringr::str_extract(Variable, "\\d{4}")),
+              VarName = stringr::str_replace(Variable, "^SSP\\d+_", ""),
+              VarName = stringr::str_replace(VarName, "_\\d{4}$", "")
+            )
+        } else {
+          long_df <- df %>%
+            dplyr::mutate(
+              Variable = NA_character_,
+              Value = NA_real_,
+              Scenario = NA_character_,
+              Year = NA_integer_,
+              VarName = NA_character_
+            )
+        }
+
+        meta_needed <- c("Hylak_id", "nam_en", "Catch_area")
+        for (col in meta_needed) {
+          if (!col %in% names(long_df)) long_df[[col]] <- NA
+        }
+
+
+        if (!"Hylak_id" %in% names(long_df) && "Hylak_id" %in% names(df)) {
+          long_df <- dplyr::left_join(long_df, df %>% dplyr::select(Hylak_id), by = character())
+        }
+
+        out <- long_df %>%
+          dplyr::select(
+            Hylak_id,
+            Year,
+            Scenario,
+            VarName,
+            Value,
+            nam_en,
+            Catch_area
+          )
+
+        write.csv(out, file, row.names = FALSE)
       }
     )
 
