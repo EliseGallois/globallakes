@@ -896,15 +896,6 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
             options = leaflet::pathOptions(clickable = FALSE)
           ) %>%
           # add the lake lines on top
-          leaflet::addPolylines(
-            data = dplyr::filter(rv$lakes_in_lev3, !(Hylak_id %in% coastal_lake_ids)),
-            color = "white",
-            opacity = 0.7,
-            group = "lake_borders",
-            weight = 0.3,
-            layerId = "lake_borders"
-          ) %>%
-          # add the lakes with highlight options
           leaflet::addPolygons(
             data = dplyr::filter(rv$lakes_in_lev3, !(Hylak_id %in% coastal_lake_ids)),
             fillColor = "#2a8a97",
@@ -913,6 +904,20 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
             layerId = ~Hylak_id,
             opacity = 1,
             fillOpacity = 1,
+            label = ~paste("Hylak ID:", as.character(Hylak_id)),
+            labelOptions = leaflet::labelOptions(
+              direction = "auto",
+              textOnly = TRUE,
+              style = list(
+                "font-weight" = "600",
+                "font-size" = "13px",
+                "color" = "#222",
+                "background" = "rgba(255,255,255,0.9)",
+                "padding" = "4px 8px",
+                "border-radius" = "6px",
+                "box-shadow" = "0 1px 3px rgba(0,0,0,0.25)"
+              )
+            ),
             highlightOptions = leaflet::highlightOptions(
               weight = 4,
               color = "yellow",
@@ -1017,6 +1022,20 @@ mod_basin_atlas_server <- function(id, rv, x, lev3_vars, lev3_lines, lev3_shapes
             layerId = ~Hylak_id,
             opacity = 1,
             fillOpacity = 1,
+            label = ~paste("Hylak ID:", as.character(Hylak_id)),
+            labelOptions = leaflet::labelOptions(
+              direction = "auto",
+              textOnly = TRUE,
+              style = list(
+                "font-weight" = "600",
+                "font-size" = "13px",
+                "color" = "#222",
+                "background" = "rgba(255,255,255,0.9)",
+                "padding" = "4px 8px",
+                "border-radius" = "6px",
+                "box-shadow" = "0 1px 3px rgba(0,0,0,0.25)"
+              )
+            ),
             highlightOptions = leaflet::highlightOptions(
               weight = 4,
               color = "yellow",
