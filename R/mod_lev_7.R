@@ -131,13 +131,27 @@ mod_lev_7_ui <- function(id) {
         fluidRow(
           column(
             12,
-            div(class = "download-box",
-                div(class = "download-button-group",
-                    downloadButton(ns("download_level7_csv"), "Download Selected Lake Catchment Data", class = "btn-primary"),
-                    #downloadButton(ns("download_level3_csv"), "Download All Regional Catchments Data", class = "btn-success"),
-                    downloadButton(ns("download_metadata"), "Download Metadata", class = "btn-secondary")
+            div(
+              class = "download-box",
+              div(
+                class = "download-button-group",
+                downloadButton(ns("download_level7_csv"), "Download Selected Lake Catchment Data", class = "btn-primary"),
+                tags$a(
+                  href = "https://zenodo.org/records/22025761",
+                  target = "_blank",
+                  rel = "noopener noreferrer",
+                  onclick = "window.open('https://zenodo.org/records/22025761', '_blank'); return false;",
+                  class = "btn btn-info action-button",
+                  style = "cursor: pointer; position: relative; z-index: 9999;",
+                  icon("external-link-alt"),
+                  " Download all catchments"
                 ),
-                div(class = "disclaimer-box",
+                downloadButton(ns("download_metadata"), "Download Metadata", class = "btn-secondary")
+              )
+            )
+          )
+        ),
+          div(class = "disclaimer-box",
                     tags$strong("Disclaimer:"),
                     " For the data sources used, please see the metadata tab and document.
                       UKCEH did not collect this data, but presents a collation from secondary sources.
@@ -145,10 +159,7 @@ mod_lev_7_ui <- function(id) {
                       This is a macro-level screening tool.
                       Nutrient emission data have been aggregated from 0.5 x 0.5 degree spatial grids from the IMAGE-GNM model.
                       Local in-situ data must always take precedence over global model estimations."
-                )
-            )
-          )
-        ),
+                ),
 
         fluidRow(
           column(
@@ -690,6 +701,8 @@ mod_lev_7_server <- function(id, rv, x, lev7_vars, globo_topo_poly) {
       }
     )
 
+
+
     output$download_metadata <- downloadHandler(
       filename = function() {
         "metadata_gnm.docx"
@@ -708,3 +721,4 @@ mod_lev_7_server <- function(id, rv, x, lev7_vars, globo_topo_poly) {
 
 ## To be copied in the server
 # mod_lev_7_server("lev_7_1")
+
